@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Movie, Review, Director, Category
+from .models import Movie, Review, Director, Category, Actor
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -12,23 +12,32 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = ['rating', 'opinion', 'movie']
+        fields = '__all__'
 
+    def update(self, instance, validated_data):
+        instance.opinion = validated_data.get('opinion', instance.opinion)
+        instance.rating = validated_data.get('rating', instance.rating)
+        instance.save()
 
-class ActorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Director
-        fields = ['name', 'surname', 'age', 'movies']
+        return instance
 
 
 class MovieSerializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(many=True, read_only=True)
-    actors = ActorSerializer(many=True)
 
     class Meta:
         model = Movie
+        depth = 1
         fields = ['id', 'title', 'description', 'year', 'director', 'full_name', 'director', 'category', 'reviews',
                   'actors']
+
+
+class ActorSerializer(serializers.ModelSerializer):
+    movies = MovieSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Actor
+        fields = '__all__'
 
 
 class DirectorSerializer(serializers.ModelSerializer):
@@ -36,7 +45,7 @@ class DirectorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Director
-        fields = ['name', 'surname', 'age', 'movies']
+        fields = '__all__'
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -44,4 +53,4 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ['name', 'movies']
+        fields = '__all__'

@@ -36,4 +36,4 @@ class Actor(models.Model):
     surname = models.CharField(max_length=32)
     age = models.IntegerField(null=True, blank=True)
     rating = models.IntegerField(null=True, blank=True)
-    movies = models.ManyToManyField(Movie)
+    movies = models.ManyToManyField(Movie, related_name='actors')
